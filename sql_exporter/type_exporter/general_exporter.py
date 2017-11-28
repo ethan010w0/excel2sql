@@ -15,6 +15,11 @@ class GeneralExporter:
     DEFAULT_IDX = 'Default'
     COMMENT_IDX = 'Comment'
 
+    # Create SQL definition xy position in Excel
+    TBL_NAME_XY = (0, 0)
+    TBL_COMMENT_XY = (0, 1)
+    TBL_IDX_X = 1
+
     def __init__(self, db_type, s_name):
         self.db_type = db_type
         self.s_name = s_name

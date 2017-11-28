@@ -28,8 +28,11 @@ class MySQLExporter(GeneralExporter):
     REF_DEF_S = 'REFERENCES `{s_name}`.`{ref_tbl_name}` (`{ref_col_name}`)'
     FK_S = 'FOREIGN KEY (`{fk_col_name}`) {ref_def}'
 
+    # Table option syntax
+    TBL_COMMENT_S = 'COMMENT \'{tbl_comment_str}\''
+
     # Create definition syntax
-    C_S = 'CREATE TABLE `{s_name}`.`{tbl_name}` ({linesep}  {c_defs}{linesep});'
+    C_S = 'CREATE TABLE `{s_name}`.`{tbl_name}` ({linesep}  {c_defs}{linesep})'
 
     # Schema name
     _s_name = str()
@@ -38,7 +41,7 @@ class MySQLExporter(GeneralExporter):
     def _get_col_def_idx(self, sh):
         col_def_idx = dict()
         for ry in range(sh.ncols):
-            c_def_tag = sh.cell_value(1, ry)
+            c_def_tag = sh.cell_value(self.TBL_IDX_X, ry)
             col_def_idx[c_def_tag] = ry
         return col_def_idx
 
@@ -158,6 +161,14 @@ class MySQLExporter(GeneralExporter):
 
         return c_defs
 
+    # Make table comment option SQL
+    def _make_tbl_comment_opt(self, sh):
+        tbl_comment_str = sh.cell_value(*self.TBL_COMMENT_XY)
+        if tbl_comment_str:
+            tbl_comment_opt = self.TBL_COMMENT_S.format(
+                tbl_comment_str=tbl_comment_str)
+            return tbl_comment_opt
+
     def export(self, excel):
         c_sqls = list()
         c_sqls.extend([self.PRE_S, os.linesep])
@@ -172,12 +183,19 @@ class MySQLExporter(GeneralExporter):
             if not c_defs:
                 continue
 
-            tbl_name = sh.cell_value(0, 0)
+            tbl_name = sh.cell_value(*self.TBL_NAME_XY)
             if tbl_name:
                 # Make create SQLs
                 c_sql = self.C_S.format(
                     s_name=self.s_name, tbl_name=tbl_name, linesep=os.linesep, c_defs=str().join(c_defs))
-                c_sqls.extend([c_sql, os.linesep * 2])
+                c_sqls.extend([c_sql, os.linesep])
+
+                tbl_comment_opt = self._make_tbl_comment_opt(sh)
+                if tbl_comment_opt:
+                    c_sqls.extend([tbl_comment_opt, os.linesep])
+
+                del c_sqls[-1]
+                c_sqls.extend([';', os.linesep * 2])
 
         c_sqls.extend(self.POST_S)
 
