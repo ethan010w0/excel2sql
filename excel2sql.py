@@ -3,6 +3,8 @@ import getopt
 import argparse
 import os
 
+from sql_exporter.sql_exporter_factory import SQLExporterFactory
+
 
 def parse_args(args):
     if not args:
@@ -29,6 +31,7 @@ def parse_opts(opts):
     return db, schema
 
 
+# Get the schema name from excel file name
 def parse_schema(excel):
     return os.path.splitext(excel)[0]
 
@@ -48,6 +51,7 @@ def help():
 
 
 def main():
+    # Parse args.
     options = "hd:s:"
     long_options = ["help", "db=", "schema=", "hib="]
     try:
@@ -59,12 +63,20 @@ def main():
     excel = parse_args(args)
     db, schema = parse_opts(opts)
 
+    # Get opts default values if no value
     if not db:
         db = 'mysql'
     if not schema:
-        schema = parse_schema(excel) 
+        schema = parse_schema(excel)
 
-    print excel, db, schema
+    # Export sql script.
+    try:
+        s_exp_fac = SQLExporterFactory(db, schema)
+        s_exp = s_exp_fac.create_exporter()
+        s_exp.export(excel)
+    except Exception as err:
+        print err
+        sys.exit()
 
 
 if __name__ == "__main__":
