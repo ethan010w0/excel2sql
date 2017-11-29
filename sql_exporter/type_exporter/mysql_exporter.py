@@ -1,7 +1,7 @@
 import os
 import xlrd
 
-from general_exporter import GeneralExporter
+from sql_exporter.type_exporter import GeneralExporter
 
 
 class MySQLExporter(GeneralExporter):
@@ -36,14 +36,6 @@ class MySQLExporter(GeneralExporter):
 
     # Schema name
     _s_name = str()
-
-    # Get column definition indexes in excel sheet
-    def _get_col_def_idx(self, sh):
-        col_def_idx = dict()
-        for ry in range(sh.ncols):
-            c_def_tag = sh.cell_value(self.TBL_IDX_X, ry)
-            col_def_idx[c_def_tag] = ry
-        return col_def_idx
 
     # Parse the default value is a value or a function
     def _parse_default_val(self, default_val):

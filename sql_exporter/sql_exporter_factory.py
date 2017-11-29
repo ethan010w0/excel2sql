@@ -11,4 +11,4 @@ class SQLExporterFactory:
         if self.db_type == 'mysql':
             return MySQLExporter(self.db_type, self.s_name)
         else:
-            raise Exception, "Unsupported database type"
+            raise Exception('Unsupported database type')
